@@ -1,0 +1,78 @@
+# [[ Manifest 1 ]]
+# 
+# Our application Deployment
+# Keeps four replicas of our app running at all times.
+# Replicas are automatically spread throughout the cluster.
+# 
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sintel
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: sintel
+  template:
+    metadata:
+      labels:
+        app: sintel
+    spec:
+      containers:
+      - name: sintel
+        image: asauber/sintel:latest
+        ports:
+        - containerPort: 80
+          protocol: TCP
+
+# [[ Manifest 2 ]]
+#
+# Service for our Deployment.
+# Creates an IP address reachable only within the cluster which load-balances
+# our application replicas.
+#
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: sintel
+spec:
+  type: ClusterIP
+  selector:
+    app: sintel
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 80
+
+# [[ Manifest 3 ]]
+#
+# A resource which allows external traffic to reach our app.
+# Tells nginx to forward traffic based on a hostname.
+# Tells cert-manager to give us a cert.
+# Tells external-dns to give us a DNS record.
+#
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: sintel-ingress
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    external-dns.alpha.kubernetes.io/hostname: sintel.kubeyboy.com
+    external-dns.alpha.kubernetes.io/ttl: "1m"
+spec:
+  tls:
+  - hosts:
+    - sintel.kubeyboy.com
+    secretName: sintel-tls
+  rules:
+  - host: sintel.kubeyboy.com
+    http:
+      paths:
+      - backend:
+          serviceName: sintel
+          servicePort: 80
