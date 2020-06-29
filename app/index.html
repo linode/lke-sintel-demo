@@ -1,12 +1,35 @@
 <html>
 <head>
 <style>
-#center {
+* {
+    font-family: sans-serif;
+}
+.content {
     margin: auto;
+    max-width: 1000px;
+}
+.video {
+    margin: auto;
+    max-width: 1000px;
+    display: block;
+}
+#text {
+    margin-top: 36px;
 }
 </style>
 </head>
 <body>
-<div id="center"><video controls src="./sintel.mp4"></video></div>
+    <div class="content">
+        <video class="video" controls src="./sintel.mp4"></video>
+        <div id="text">
+            <h1><a href="https://durian.blender.org/about/">Sintel</a> A Blender Foundation Open Move Project</h1>
+            <h1>Linode Kubernetes Engine Demo</h1>
+            <ul>
+                <li><h3>Service routing by <a href="https://github.com/kubernetes/ingress-nginx">NGINX Ingress</a></h3></li>
+                <li><h3>DNS records by <a href="https://github.com/kubernetes-sigs/external-dns">External DNS</a></h3></li>
+                <li><h3>Certificate by <a href="https://github.com/jetstack/cert-manager">Cert Manager</a></h3></li>
+            </ul>
+        </div>
+    </div>
 </body>
 </html>
