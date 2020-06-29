@@ -22,11 +22,35 @@ spec:
       containers:
       - name: sintel
         image: asauber/sintel:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
           protocol: TCP
 
 # [[ Manifest 2 ]]
+# Cluster Issuer Manifest
+#
+---
+apiVersion: cert-manager.io/v1alpha2
+kind: ClusterIssuer
+metadata:
+  name: letsencrypt-prod
+spec:
+  acme:
+    # Email address used for ACME registration
+    # Be sure to replace with your own email address!
+    email: example@example.com
+    server: https://acme-v02.api.letsencrypt.org/directory
+    privateKeySecretRef:
+      # Name of a secret used to store the ACME account private key
+      name: letsencrypt-prod
+    # Add a single challenge solver, HTTP01 using nginx
+    solvers:
+    - http01:
+        ingress:
+          class: nginx
+
+# [[ Manifest 3 ]]
 #
 # Service for our Deployment.
 # Creates an IP address reachable only within the cluster which load-balances
@@ -47,7 +71,7 @@ spec:
       port: 80
       targetPort: 80
 
-# [[ Manifest 3 ]]
+# [[ Manifest 4 ]]
 #
 # A resource which allows external traffic to reach our app.
 # Tells nginx to forward traffic based on a hostname.
@@ -62,17 +86,18 @@ metadata:
   annotations:
     kubernetes.io/ingress.class: nginx
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    external-dns.alpha.kubernetes.io/hostname: sintel.kubeyboy.com
-    external-dns.alpha.kubernetes.io/ttl: "1m"
+    external-dns.alpha.kubernetes.io/hostname: demo1.kubeyboy.com
+    external-dns.alpha.kubernetes.io/ttl: "5m"
 spec:
   tls:
   - hosts:
-    - sintel.kubeyboy.com
+    - demo1.kubeyboy.com
     secretName: sintel-tls
   rules:
-  - host: sintel.kubeyboy.com
+  - host: demo1.kubeyboy.com
     http:
       paths:
       - backend:
           serviceName: sintel
           servicePort: 80
+
